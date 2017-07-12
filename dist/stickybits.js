@@ -72,14 +72,22 @@ Stickybit.prototype.manageStickiness = function manageStickiness() {
   var vp = this.vp;
   var offset = this.offset;
   var styles = this.styles;
-  var classes = el.classList;
   var win = window;
   var rAF = win.requestAnimationFrame;
 
   // setup css classes
-  parent.classList.add('js-stickybit-parent');
+  parent.className += ' js-stickybit-parent';
   var stickyClass = 'js-is-sticky';
   var stuckClass = 'js-is-stuck';
+  // r arg = removeClass
+  // a arg = addClass
+  function updateClasses(r, a) {
+    var cArray = el.className.split(' ');
+    if (a && cArray.indexOf(a) === -1) cArray.push(a);
+    var rItem = cArray.indexOf(r);
+    if (rItem !== -1) cArray.splice(rItem, 1);
+    el.className = cArray.join(' ');
+  }
 
   // manageState
   var stickyStart = parent.getBoundingClientRect().top;
@@ -94,8 +102,7 @@ Stickybit.prototype.manageStickiness = function manageStickiness() {
     if (notSticky) {
       state = 'sticky';
       rAF(function () {
-        classes.add(stickyClass);
-        if (classes.contains(stuckClass)) classes.remove(stuckClass);
+        updateClasses(stuckClass, stickyClass);
         styles.bottom = '';
         styles.position = pv;
         styles[vp] = offset + 'px';
@@ -103,14 +110,13 @@ Stickybit.prototype.manageStickiness = function manageStickiness() {
     } else if (isSticky) {
       state = 'default';
       rAF(function () {
-        classes.remove(stickyClass);
+        updateClasses(stickyClass);
         if (pv === 'fixed') styles.position = '';
       });
     } else if (isStuck) {
       state = 'stuck';
       rAF(function () {
-        classes.remove(stickyClass);
-        classes.add(stuckClass);
+        updateClasses(stickyClass, stuckClass);
         if (pv !== 'fixed') return;
         styles.top = '';
         styles.bottom = '0';
